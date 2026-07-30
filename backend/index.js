@@ -14,35 +14,55 @@ dotenv.config();
 
 const app = express();
 
-// Middlewares
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// CORS (Localhost Only)
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://job-portal-mern-frontend-n5vv.onrender.com",
-    ],
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
 
-// Root Route
+// Health Check
 app.get("/", (req, res) => {
-  res.send("Job Portal Backend API is Running 🚀");
+  res.status(200).json({
+    success: true,
+    message: "Job Portal Backend API is Running 🚀",
+  });
 });
 
-// API Routes
+// Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server running at port ${PORT}`);
+// Invalid Route
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route Not Found",
+  });
 });
+
+const PORT = process.env.PORT || 5000;
+
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`✅ Server Running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.log("❌ Server Failed to Start");
+    console.error(error);
+    process.exit(1);
+  }
+};
+
+startServer();
