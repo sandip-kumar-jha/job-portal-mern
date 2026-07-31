@@ -22,7 +22,7 @@ app.use(cookieParser());
 // CORS (Localhost Only)
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://job-portal-mern-tan.vercel.app",
     credentials: true,
   })
 );
