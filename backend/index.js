@@ -14,20 +14,39 @@ dotenv.config();
 
 const app = express();
 
+// ===============================
 // Middleware
+// ===============================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS (Localhost Only)
+// ===============================
+// CORS
+// ===============================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://job-portal-mern-tan.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "https://job-portal-mern-tan.vercel.app",
+    origin: (origin, callback) => {
+      // Allow requests without an origin
+      // (Postman, server-to-server, etc.)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS policy: Origin not allowed"));
+      }
+    },
     credentials: true,
   })
 );
 
+// ===============================
 // Health Check
+// ===============================
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
@@ -35,13 +54,17 @@ app.get("/", (req, res) => {
   });
 });
 
+// ===============================
 // Routes
+// ===============================
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 
+// ===============================
 // Invalid Route
+// ===============================
 app.use("*", (req, res) => {
   res.status(404).json({
     success: false,
@@ -49,6 +72,9 @@ app.use("*", (req, res) => {
   });
 });
 
+// ===============================
+// Server
+// ===============================
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
