@@ -34,6 +34,11 @@ const Login = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    if (!input.email || !input.password || !input.role) {
+      toast.error("Please fill all fields and select your role.");
+      return;
+    }
+
     try {
       dispatch(setLoading(true));
 
@@ -41,9 +46,6 @@ const Login = () => {
         `${USER_API_END_POINT}/login`,
         input,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
           withCredentials: true,
         }
       );
@@ -54,10 +56,10 @@ const Login = () => {
         navigate("/");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Login Error:", error);
 
       toast.error(
-        error.response?.data?.message || "Something went wrong."
+        error.response?.data?.message || "Login failed."
       );
     } finally {
       dispatch(setLoading(false));
@@ -148,7 +150,10 @@ const Login = () => {
 
           <span className="text-sm">
             Don't have an account?{" "}
-            <Link to="/signup" className="text-blue-600 hover:underline">
+            <Link
+              to="/signup"
+              className="text-blue-600 hover:underline"
+            >
               Signup
             </Link>
           </span>
