@@ -8,8 +8,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
-import { useDispatch, useSelector } from "react-redux";
-import { setLoading, setUser } from "@/redux/authSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "@/redux/authSlice";
 import { Loader2 } from "lucide-react";
 
 const Login = () => {
@@ -19,7 +19,9 @@ const Login = () => {
     role: "",
   });
 
-  const { loading, user } = useSelector((store) => store.auth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { user } = useSelector((store) => store.auth);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -35,12 +37,12 @@ const Login = () => {
     e.preventDefault();
 
     if (!input.email || !input.password || !input.role) {
-      toast.error("Please fill all fields and select your role.");
+      toast.error("Please fill all fields.");
       return;
     }
 
     try {
-      dispatch(setLoading(true));
+      setIsSubmitting(true);
 
       const res = await axios.post(
         `${USER_API_END_POINT}/login`,
@@ -56,13 +58,13 @@ const Login = () => {
         navigate("/");
       }
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("LOGIN ERROR:", error);
 
       toast.error(
-        error.response?.data?.message || "Login failed."
+        error?.response?.data?.message || "Invalid email, password or role."
       );
     } finally {
-      dispatch(setLoading(false));
+      setIsSubmitting(false);
     }
   };
 
@@ -85,7 +87,6 @@ const Login = () => {
 
           <div className="my-2">
             <Label>Email</Label>
-
             <Input
               type="email"
               name="email"
@@ -98,7 +99,6 @@ const Login = () => {
 
           <div className="my-2">
             <Label>Password</Label>
-
             <Input
               type="password"
               name="password"
@@ -137,7 +137,7 @@ const Login = () => {
             </RadioGroup>
           </div>
 
-          {loading ? (
+          {isSubmitting ? (
             <Button disabled className="w-full my-4">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Please wait...
@@ -150,10 +150,7 @@ const Login = () => {
 
           <span className="text-sm">
             Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-blue-600 hover:underline"
-            >
+            <Link to="/signup" className="text-blue-600 hover:underline">
               Signup
             </Link>
           </span>
