@@ -8,8 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
-import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "@/redux/authSlice";
+import { useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 
 const Signup = () => {
@@ -19,12 +18,13 @@ const Signup = () => {
     phoneNumber: "",
     password: "",
     role: "",
-    file: "",
+    file: null,
   });
 
-  const { loading, user } = useSelector((store) => store.auth);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const dispatch = useDispatch();
+  const { user } = useSelector((store) => store.auth);
+
   const navigate = useNavigate();
 
   const changeEventHandler = (e) => {
@@ -37,7 +37,7 @@ const Signup = () => {
   const changeFileHandler = (e) => {
     setInput({
       ...input,
-      file: e.target.files?.[0],
+      file: e.target.files?.[0] || null,
     });
   };
 
@@ -51,7 +51,7 @@ const Signup = () => {
       !input.password ||
       !input.role
     ) {
-      toast.error("Please fill all fields and select your role.");
+      toast.error("Please fill all required fields.");
       return;
     }
 
@@ -68,7 +68,7 @@ const Signup = () => {
     }
 
     try {
-      dispatch(setLoading(true));
+      setIsSubmitting(true);
 
       const res = await axios.post(
         `${USER_API_END_POINT}/register`,
@@ -83,13 +83,13 @@ const Signup = () => {
         navigate("/login");
       }
     } catch (error) {
-      console.error("Signup Error:", error);
+      console.error("SIGNUP ERROR:", error);
 
       toast.error(
-        error.response?.data?.message || "Registration failed."
+        error?.response?.data?.message || "Registration failed."
       );
     } finally {
-      dispatch(setLoading(false));
+      setIsSubmitting(false);
     }
   };
 
@@ -112,7 +112,6 @@ const Signup = () => {
 
           <div className="my-2">
             <Label>Full Name</Label>
-
             <Input
               type="text"
               name="fullname"
@@ -125,7 +124,6 @@ const Signup = () => {
 
           <div className="my-2">
             <Label>Email</Label>
-
             <Input
               type="email"
               name="email"
@@ -138,7 +136,6 @@ const Signup = () => {
 
           <div className="my-2">
             <Label>Phone Number</Label>
-
             <Input
               type="text"
               name="phoneNumber"
@@ -151,7 +148,6 @@ const Signup = () => {
 
           <div className="my-2">
             <Label>Password</Label>
-
             <Input
               type="password"
               name="password"
@@ -201,7 +197,7 @@ const Signup = () => {
             </div>
           </div>
 
-          {loading ? (
+          {isSubmitting ? (
             <Button disabled className="w-full my-4">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Please wait...
@@ -214,10 +210,7 @@ const Signup = () => {
 
           <span className="text-sm">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-blue-600 hover:underline"
-            >
+            <Link to="/login" className="text-blue-600 hover:underline">
               Login
             </Link>
           </span>
