@@ -44,6 +44,17 @@ const Signup = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
+    if (
+      !input.fullname ||
+      !input.email ||
+      !input.phoneNumber ||
+      !input.password ||
+      !input.role
+    ) {
+      toast.error("Please fill all fields and select your role.");
+      return;
+    }
+
     const formData = new FormData();
 
     formData.append("fullname", input.fullname);
@@ -63,9 +74,6 @@ const Signup = () => {
         `${USER_API_END_POINT}/register`,
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
           withCredentials: true,
         }
       );
@@ -75,7 +83,7 @@ const Signup = () => {
         navigate("/login");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Signup Error:", error);
 
       toast.error(
         error.response?.data?.message || "Registration failed."
@@ -206,7 +214,10 @@ const Signup = () => {
 
           <span className="text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 hover:underline">
+            <Link
+              to="/login"
+              className="text-blue-600 hover:underline"
+            >
               Login
             </Link>
           </span>
